@@ -2881,7 +2881,6 @@ const LoadGeometry = async (renderer, geoOptions) => {
     }
   }
   
-  
   if(flipX){
     for(var i=0; i< vertices.length; i+=3){
       vertices[i+1] *= -1
@@ -3907,6 +3906,27 @@ const GetShaderCoord = (vx, vy, vz, geometry, renderer,
       return [X, Y, Z]
     }
     return false
+  }
+}
+
+const FlipNormals = shape => {
+  var x, y, z, x1, y1, z1, x2, y2, z2
+  for(var i = 0; i < shape.normals; i+=6){
+    x1 = shape.normals[i+0]
+    y1 = shape.normals[i+1]
+    z1 = shape.normals[i+2]
+    x2 = shape.normals[i+3]
+    y2 = shape.normals[i+4]
+    z2 = shape.normals[i+5]
+    
+    shape.normals[i+3] = x1 - (x2-x1)
+    shape.normals[i+4] = y1 - (y2-y1)
+    shape.normals[i+5] = z1 - (z2-z1)
+  }
+  for(var i = 0; i < shape.normalVecs.length; i += 3){
+    shape.normalVecs[i+0] *= -1
+    shape.normalVecs[i+1] *= -1
+    shape.normalVecs[i+2] *= -1
   }
 }
 
@@ -6977,11 +6997,10 @@ const GeometryFromRaw = (raw, texCoords, size, subs,
 }
 
 const ApplyLocation = shape => {
-  var ax = 0, ay = 0, az = 0, ct = 0, x, y, z
   for(var i = 0; i < shape.vertices.length; i+=3){
-    shape.vertices[i+0] += shape.x
-    shape.vertices[i+1] += shape.y
-    shape.vertices[i+2] += shape.z
+    shape.vertices[i+0] += shape.x * 2
+    shape.vertices[i+1] += shape.y * 2
+    shape.vertices[i+2] += shape.z * 2
   }
   shape.x = 0
   shape.y = 0
@@ -6989,72 +7008,81 @@ const ApplyLocation = shape => {
 }
 
 const ApplyRotation = shape => {
-  var ax = 0, ay = 0, az = 0, ct = 0, x, y, z, p, d
-  var cx = shape.x
-  var cy = shape.y
-  var cz = shape.z
-  for(var i = 0; i < shape.vertices.length; i+=3){
-    x = shape.vertices[i+0]
-    y = shape.vertices[i+1]
-    z = shape.vertices[i+2]
-    switch(shape.rotationMode){
-      case 0:
-        p = Math.atan2(x, y)
-        d = Math.hypot(x, y)
-        x = S(p) * d
-        y = C(p) * d
-        p = Math.atan2(x, z)
-        d = Math.hypot(x, z)
-        x = S(p) * d
-        z = C(p) * d
-        p = Math.atan2(y, z)
-        d = Math.hypot(y, z)
-        y = S(p) * d
-        z = C(p) * d
-      case 1:
-        p = Math.atan2(y, z)
-        d = Math.hypot(y, z)
-        y = S(p) * d
-        z = C(p) * d
-        p = Math.atan2(x, z)
-        d = Math.hypot(x, z)
-        x = S(p) * d
-        z = C(p) * d
-        p = Math.atan2(x, y)
-        d = Math.hypot(x, y)
-        x = S(p) * d
-        y = C(p) * d
-      case 2:
-        p = Math.atan2(x, z)
-        d = Math.hypot(x, z)
-        x = S(p) * d
-        z = C(p) * d
-        p = Math.atan2(y, z)
-        d = Math.hypot(y, z)
-        y = S(p) * d
-        z = C(p) * d
-        p = Math.atan2(x, y)
-        d = Math.hypot(x, y)
-        x = S(p) * d
-        y = C(p) * d
-      case 3:
-        p = Math.atan2(x, z)
-        d = Math.hypot(x, z)
-        x = S(p) * d
-        z = C(p) * d
-        p = Math.atan2(y, z)
-        d = Math.hypot(y, z)
-        y = S(p) * d
-        z = C(p) * d
-        p = Math.atan2(x, y)
-        d = Math.hypot(x, y)
-        x = S(p) * d
-        y = C(p) * d
+  var x, y, z, p, d, component
+  for(var m = 3; m--;){
+    switch(m){
+      case 0: component = 'vertices'; break
+      case 1: component = 'normalVecs'; break
+      case 2: component = 'normals'; break
     }
-    shape.vertices[i+0] = x
-    shape.vertices[i+1] = y
-    shape.vertices[i+2] = z
+    for(var i = 0; i < shape[component].length; i+=3){
+      x = shape[component][i+0]
+      y = shape[component][i+1]
+      z = shape[component][i+2]
+      switch(shape.rotationMode){
+        case 0:
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+        break
+        case 1:
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+        break
+        case 2:
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+        break
+        case 3:
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+        break
+      }
+      shape[component][i+0] = x
+      shape[component][i+1] = y
+      shape[component][i+2] = z
+    }
   }
+  shape.yaw = shape.pitch = shape.roll = 0
 }
 
 const ApplyScale = shape => {
@@ -9254,6 +9282,53 @@ const LoadFPSControls = async (renderer, options) => {
   }
 }
 
+const RecomputeNormalsOutside = (shape, flip = false) => {
+  if(shape.averageNormals) {
+    AverageNormals(shape.vertices, shape.normals,
+      shape.shapeType, shape.normalVecs,
+      false, shape.flatShadingNormalVecs)
+  }else{
+    var ax=0, ay=0, az=0, ct=0
+    for(var i = 0; i < shape.vertices.length; i+=3){
+      ax += shape.vertices[i+0]
+      ay += shape.vertices[i+1]
+      az += shape.vertices[i+2]
+      ct++
+    }
+    ax /= ct
+    ay /= ct
+    az /= ct
+    var f = flip ? -1 : 1
+    for(var i = 0; i < shape.normalVecs.length; i += 9){
+      var x1 = shape.normalVecs[i+0]
+      var y1 = shape.normalVecs[i+1]
+      var z1 = shape.normalVecs[i+2]
+      var x2 = shape.normalVecs[i+3]
+      var y2 = shape.normalVecs[i+4]
+      var z2 = shape.normalVecs[i+5]
+      var x3 = shape.normalVecs[i+6]
+      var y3 = shape.normalVecs[i+7]
+      var z3 = shape.normalVecs[i+8]
+      var n = Normal([[x1,y1,z1],
+                      [x2,y2,z2],
+                      [x3,y3,z3]], true,
+                      ax, ay, az)
+      var nx = n[3] - n[0]
+      var ny = n[4] - n[1]
+      var nz = n[5] - n[2]
+      shape.normalVecs[i+0] = nx * f
+      shape.normalVecs[i+1] = ny * f
+      shape.normalVecs[i+2] = nz * f
+      shape.normalVecs[i+3] = nx * f
+      shape.normalVecs[i+4] = ny * f
+      shape.normalVecs[i+5] = nz * f
+      shape.normalVecs[i+6] = nx * f
+      shape.normalVecs[i+7] = ny * f
+      shape.normalVecs[i+8] = nz * f
+    }
+  }
+}
+
 const ShouldDisableDepth = shape => {
   //return false
   return ((!shape.isParticle) && (!shape.isLine) &&
@@ -9824,6 +9899,7 @@ export {
   ShiftArray,
   ShiftArray2D,
   ShiftArray3D,
+  FlipNormals,
   ImageToPo2,
   LoadOBJ,
   IsPowerOf2,
@@ -9835,6 +9911,7 @@ export {
   RGBFromHSV,
   HexFromRGB,
   RGBToHex,
+  RecomputeNormalsOutside,
   RGBFromHex,
   HexToRGB,
   GeoSphere,
