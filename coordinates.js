@@ -7097,9 +7097,9 @@ const ApplyScale = shape => {
 }
 
 const ApplyAllTransforms = shape => {
+  ApplyScale(shape)
   ApplyRotation(shape)
   ApplyLocation(shape)
-  ApplyScale(shape)
 }
 
 
