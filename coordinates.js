@@ -9840,6 +9840,10 @@ const ShapeArray = {
   },
 }
 
+const ApplyAll = shape => {
+  return ApplyAllTransforms(shape)
+}
+
 const GenHash = data => Hash.GenHash(data)
 
 var Overlay        // for sketch-up, e.g. shape-bounding graphics
@@ -9894,6 +9898,7 @@ export {
   ApplyLocation,
   ApplyRotation,
   ApplyScale,
+  ApplyAll,
   ApplyAllTransforms,
   InitialTime,
   ShiftArray,
