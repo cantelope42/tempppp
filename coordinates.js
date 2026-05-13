@@ -7087,9 +7087,9 @@ const ApplyRotation = shape => {
 
 const ApplyScale = shape => {
   for(var i = 0; i < shape.vertices.length; i += 3){
-    x = shape.vertices[i+0] *= shape.scaleX
-    y = shape.vertices[i+1] *= shape.scaleY
-    z = shape.vertices[i+2] *= shape.scaleZ
+    shape.vertices[i+0] *= shape.scaleX
+    shape.vertices[i+1] *= shape.scaleY
+    shape.vertices[i+2] *= shape.scaleZ
   }
   shape.scaleX = 1
   shape.scaleY = 1
