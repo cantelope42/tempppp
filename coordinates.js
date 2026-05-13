@@ -7098,8 +7098,8 @@ const ApplyScale = shape => {
 
 const ApplyAllTransforms = shape => {
   ApplyRotation(shape)
-  ApplyScale(shape)
   ApplyLocation(shape)
+  ApplyScale(shape)
 }
 
 
