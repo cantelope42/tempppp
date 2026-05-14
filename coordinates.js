@@ -5275,8 +5275,8 @@ const BasicShader = async (renderer, options=[]) => {
 
           }else{
             geo = Quat(geoPos, vec3(camOri.x, -camOri.y, -camOri.z), 0);
-            pos = Quat(vec3(cx, cy, cz), quatAxis, 1);
             pos = Quat(pos, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
+            pos = Quat(vec3(cx, cy, cz), quatAxis, 1);
             pos.x += cpx;
             pos.y += cpy;
             pos.z += cpz;
@@ -5302,8 +5302,8 @@ const BasicShader = async (renderer, options=[]) => {
           }else{
             geo = Quat(geoPos, vec3(camOri.x, camOri.y, -camOri.z), 0);
             pos = vec3(cx, cy, cz);
-            pos = Quat(pos, quatAxis, 1);
             pos = Quat(pos, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
+            pos = Quat(pos, quatAxis, 1);
             pos = Quat(pos, vec3(camOri.x, camOri.y, -camOri.z), 0);
             
             nVec = vec3(nVeci.x, nVeci.y, nVeci.z);
