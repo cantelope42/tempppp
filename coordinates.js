@@ -7092,12 +7092,16 @@ const ApplyRotation = shape => {
           y = C(p) * d
         break
       }
-      shape[component][i+0] = x
-      shape[component][i+1] = y
-      shape[component][i+2] = z
+      
+      var res = Quat([x, y, z], shape.quatAxis)
+      
+      shape[component][i+0] = res[0]
+      shape[component][i+1] = res[1]
+      shape[component][i+2] = res[2]
     }
   }
   shape.yaw = shape.pitch = shape.roll = 0
+  shape.quatAxis = [0,0,0]
 }
 
 const ApplyScale = shape => {
