@@ -442,7 +442,7 @@ const Renderer = async options => {
                                                      geometry.y + renderer.offsetY,
                                                      geometry.z + renderer.offsetZ)
               ctx.uniform3f(dset.locGeoOri,          geometry.roll, geometry.pitch, geometry.yaw)
-              ctx.uniform3f(dset.locQuatAxis,        geometry.quatAxis)
+              ctx.uniform3f(dset.locQuatAxis,        ...geometry.quatAxis)
 
               ctx.uniform1f(dset.locFov,             renderer.fov)
               ctx.uniform1f(dset.locEquirectangular, geometry.equirectangular ? 1.0 : 0.0)
@@ -943,7 +943,7 @@ const Renderer = async options => {
               ctx.uniform3f(dset.locGeoPos,          geometry.x + renderer.offsetX,
                                                      geometry.y + renderer.offsetY,
                                                      geometry.z + renderer.offsetZ)
-              ctx.uniform3f(dset.locQuatAxis,        geometry.quatAxis)
+              ctx.uniform3f(dset.locQuatAxis,        ...geometry.quatAxis)
               ctx.uniform3f(dset.locGeoOri,          geometry.roll, geometry.pitch, geometry.yaw)
               ctx.uniform1f(dset.locFov,             renderer.fov)
               ctx.uniform1f(dset.locEquirectangular, geometry.equirectangular ? 1.0 : 0.0)
@@ -6153,7 +6153,7 @@ const BasicShader = async (renderer, options=[]) => {
           gl.uniform1f(dset.locScaleZ, geometry.scaleZ)
 
           dset.locQuatAxis = gl.getUniformLocation(dset.program, "quatAxis")
-          gl.uniform3f(dset.locQuatAxis, geometry.quatAxis)
+          gl.uniform3f(dset.locQuatAxis, ...geometry.quatAxis)
 
           dset.locShapeArrayIsSprite = gl.getUniformLocation(dset.program, "shapeArrayIsSprite")
           gl.uniform1f(dset.locShapeArrayIsSprite, geometry.shapeArrayIsSprite ? 1.0 : 0.0)
