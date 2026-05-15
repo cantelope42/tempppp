@@ -7070,7 +7070,7 @@ const ApplyRotation = shape => {
       x = shape[component][i+0]
       y = shape[component][i+1]
       z = shape[component][i+2]
-      switch(shape.rotationMode){
+      switch(0){ //shape.rotationMode){
         case 0:
           p = Math.atan2(x, y) + shape.roll
           d = Math.hypot(x, y)
