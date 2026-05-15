@@ -5284,11 +5284,11 @@ const BasicShader = async (renderer, options=[]) => {
             pos = Quat(pos,  vec3(-camOri.x, -camOri.y, -camOri.z), 0);
 
             nVec = Quat(nVeci, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            pos = Quat(nVec, quatAxis, 1);
+            nVec = Quat(nVec, quatAxis, 1);
             nVec = Quat(nVec, vec3(0.0, -camOri.y, -camOri.z), 0);
 
             fsnVec = Quat(fsnVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            pos = Quat(fsnVec, quatAxis, 1);
+            fsnVec = Quat(fsnVec, quatAxis, 1);
             fsnVec = Quat(fsnVec, vec3(0.0, -camOri.y, -camOri.z), 0);
           }
           cpx = 0.0;
@@ -5311,11 +5311,11 @@ const BasicShader = async (renderer, options=[]) => {
             
             nVec = vec3(nVeci.x, nVeci.y, nVeci.z);
             nVec = Quat(nVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            pos = Quat(nVec, quatAxis, 1);
+            nVec = Quat(nVec, quatAxis, 1);
             nVec = Quat(nVec, vec3(camOri.x, camOri.y, -camOri.z), 0);
 
             fsnVec = Quat(fsnVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            pos = Quat(fsnVec, quatAxis, 1);
+            fsnVec = Quat(fsnVec, quatAxis, 1);
             fsnVec = Quat(fsnVec, vec3(camOri.x, camOri.y, -camOri.z), 0);
           }
           fPos = pos;
