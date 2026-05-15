@@ -5284,9 +5284,11 @@ const BasicShader = async (renderer, options=[]) => {
             pos = Quat(pos,  vec3(-camOri.x, -camOri.y, -camOri.z), 0);
 
             nVec = Quat(nVeci, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
+            pos = Quat(nVec, quatAxis, 1);
             nVec = Quat(nVec, vec3(0.0, -camOri.y, -camOri.z), 0);
 
             fsnVec = Quat(fsnVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
+            pos = Quat(fsnVec, quatAxis, 1);
             fsnVec = Quat(fsnVec, vec3(0.0, -camOri.y, -camOri.z), 0);
           }
           cpx = 0.0;
@@ -5309,9 +5311,11 @@ const BasicShader = async (renderer, options=[]) => {
             
             nVec = vec3(nVeci.x, nVeci.y, nVeci.z);
             nVec = Quat(nVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
+            pos = Quat(nVec, quatAxis, 1);
             nVec = Quat(nVec, vec3(camOri.x, camOri.y, -camOri.z), 0);
 
             fsnVec = Quat(fsnVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
+            pos = Quat(fsnVec, quatAxis, 1);
             fsnVec = Quat(fsnVec, vec3(camOri.x, camOri.y, -camOri.z), 0);
           }
           fPos = pos;
@@ -7009,6 +7013,38 @@ const GeometryFromRaw = (raw, texCoords, size, subs,
   return {
     geometry
   }
+}
+
+const ClearLocation = shape => {
+  shape.x = 0
+  shape.y = 0
+  shape.z = 0
+  shape.offsetX = 0
+  shape.offsetY = 0
+  shape.offsetZ = 0
+}
+
+const ClearScale= shape => {
+  shape.scaleX = 1
+  shape.scaleY = 1
+  shape.scaleZ = 1
+}
+
+const ClearRotation = shape => {
+  shape.yaw = 0
+  shape.pitch = 0
+  shape.roll = 0
+  shape.quatAxis = [0,0,0]
+}
+
+const ClearAllTransforms = shape => {
+  ClearLocation()
+  ClearScale()
+  ClearRotation()
+}
+
+const ClearAll = shape => {
+  ClearAllTransforms()
 }
 
 const ApplyLocation = shape => {
@@ -9935,6 +9971,10 @@ export {
   ApplyScale,
   ApplyAll,
   ApplyAllTransforms,
+  ClearRotation,
+  ClearScale,
+  ClearAll,
+  ClearAllTransforms,
   InitialTime,
   ShiftArray,
   ShiftArray2D,
