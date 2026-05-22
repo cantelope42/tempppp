@@ -69,9 +69,6 @@ const Renderer = async options => {
   var fog             = 0
   var frameCount      = 0
   var rotationMode    = 0
-  var offsetX         = 0
-  var offsetY         = 0
-  var offsetZ         = 0
   var fogColor        = [0,0,0]
   var dataArray       = {
     data: [],
@@ -109,9 +106,6 @@ const Renderer = async options => {
         case 'x': x = options[key]; break
         case 'y': y = options[key]; break
         case 'z': z = options[key]; break
-        case 'offsetx': offsetX = options[key]; break
-        case 'offsety': offsetY = options[key]; break
-        case 'offsetz': offsetZ = options[key]; break
         case 'roll': roll = options[key]; break
         case 'pitch': pitch = options[key]; break
         case 'yaw': yaw = options[key]; break
@@ -188,17 +182,20 @@ const Renderer = async options => {
   })
   
   ret = {
+    // vars & objects
     c, ctx, contextType, t:0, alpha,
     width, height, x, y, z, attachToBody,
     roll, pitch, yaw, fov, context,
-    offsetX, offsetY, offsetZ,
     ready: false, ambientLight, clearColor,
     pointLights, pointLightCols, dataArray, glowQueue,
     alphaQueue, particleQueue, lineQueue, active,
     cameraMode, showCrosshair, crosshairSel,
     crosshairMap, pageX, pageY, mouseX, mouseY, frameCount,
     mouseButton, rsz, margin, optionalPlugins, fogColor,
-    rotationMode,
+    rotationMode
+    
+    // functions
+    // ...
   }
   rsz()
   ret[contextType == '2d' ? 'ctx' : 'gl'] = ctx
@@ -438,9 +435,7 @@ const Renderer = async options => {
               ctx.uniform2f(dset.locResolution,      renderer.width, renderer.height)
               ctx.uniform3f(dset.locCamPos,          renderer.x, renderer.y, renderer.z)
               ctx.uniform3f(dset.locCamOri,          renderer.roll, renderer.pitch, renderer.yaw)
-              ctx.uniform3f(dset.locGeoPos,          geometry.x + renderer.offsetX,
-                                                     geometry.y + renderer.offsetY,
-                                                     geometry.z + renderer.offsetZ)
+              ctx.uniform3f(dset.locGeoPos,          geometry.x, geometry.y, geometry.z)
               ctx.uniform3f(dset.locGeoOri,          geometry.roll, geometry.pitch, geometry.yaw)
               ctx.uniform1f(dset.locFov,             renderer.fov)
               ctx.uniform1f(dset.locEquirectangular, geometry.equirectangular ? 1.0 : 0.0)
@@ -935,9 +930,7 @@ const Renderer = async options => {
               ctx.uniform2f(dset.locResolution,      renderer.width, renderer.height)
               ctx.uniform3f(dset.locCamPos,          renderer.x, renderer.y, renderer.z)
               ctx.uniform3f(dset.locCamOri,          renderer.roll, renderer.pitch, renderer.yaw)
-              ctx.uniform3f(dset.locGeoPos,          geometry.x + renderer.offsetX,
-                                                     geometry.y + renderer.offsetY,
-                                                     geometry.z + renderer.offsetZ)
+              ctx.uniform3f(dset.locGeoPos,          geometry.x, geometry.y, geometry.z)
               ctx.uniform3f(dset.locGeoOri,          geometry.roll, geometry.pitch, geometry.yaw)
               ctx.uniform1f(dset.locFov,             renderer.fov)
               ctx.uniform1f(dset.locEquirectangular, geometry.equirectangular ? 1.0 : 0.0)
@@ -2207,10 +2200,10 @@ const LoadGeometry = async (renderer, geoOptions) => {
     if(subs < 5 && hint){
       var fileBase
       if(1)switch(hint){
-        //case 'cylinder_0':
-        //case 'cylinder_1':
-        //case 'cylinder_2':
-        //case 'cylinder_3':
+        case 'cylinder_0':
+        case 'cylinder_1':
+        case 'cylinder_2':
+        case 'cylinder_3':
         case 'torus_0':
         case 'torus knot_0':
         case 'tetrahedron_0':
@@ -2479,12 +2472,6 @@ const LoadGeometry = async (renderer, geoOptions) => {
         })
       break
       case 'cylinder':
-        shape = await LoadOBJ(`${ModuleBase}/prebuilt%20shapes/cylinder.obj`,
-                        size, 0,0,0,0,0,0, false, true)
-        vertices = shape.vertices
-        normals  = shape.normals
-        uvs      = shape.uvs
-        /*
         shape = await Cylinder(size, subs, rows, cols, sphereize,
                       flipNormals, shapeType)
         shape.geometry.map(v => {
@@ -2492,7 +2479,6 @@ const LoadGeometry = async (renderer, geoOptions) => {
           normals.push(...v.normal)
           uvs.push(...v.texCoord)
         })
-        */
       break
       case 'dynamic':
         shape = await GeometryFromRaw(geometryData, texCoords,
