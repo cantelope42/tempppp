@@ -442,8 +442,6 @@ const Renderer = async options => {
                                                      geometry.y + renderer.offsetY,
                                                      geometry.z + renderer.offsetZ)
               ctx.uniform3f(dset.locGeoOri,          geometry.roll, geometry.pitch, geometry.yaw)
-              ctx.uniform3f(dset.locQuatAxis,        ...geometry.quatAxis)
-
               ctx.uniform1f(dset.locFov,             renderer.fov)
               ctx.uniform1f(dset.locEquirectangular, geometry.equirectangular ? 1.0 : 0.0)
               ctx.uniform1f(dset.locRenderNormals,   0)
@@ -943,7 +941,6 @@ const Renderer = async options => {
               ctx.uniform3f(dset.locGeoPos,          geometry.x + renderer.offsetX,
                                                      geometry.y + renderer.offsetY,
                                                      geometry.z + renderer.offsetZ)
-              ctx.uniform3f(dset.locQuatAxis,        ...geometry.quatAxis)
               ctx.uniform3f(dset.locGeoOri,          geometry.roll, geometry.pitch, geometry.yaw)
               ctx.uniform1f(dset.locFov,             renderer.fov)
               ctx.uniform1f(dset.locEquirectangular, geometry.equirectangular ? 1.0 : 0.0)
@@ -1944,7 +1941,6 @@ const LoadGeometry = async (renderer, geoOptions) => {
   var x = 0, y = 0, z = 0
   var flipX = false, flipY = false, flipZ = false
   var roll = 0, pitch = 0, yaw = 0
-  var quatAxis = [0,0,0]
   var scaleX=1, scaleY=1, scaleZ=1
   var scaleUVX  = 1, scaleUVY  = 1
   var offsetUVX = 0, offsetUVY = 0
@@ -2063,7 +2059,6 @@ const LoadGeometry = async (renderer, geoOptions) => {
       case 'offsety'            : offsetY = geoOptions[key]; break
       case 'offsetz'            : offsetZ = geoOptions[key]; break
       case 'sphereize'          : sphereize = geoOptions[key]; break
-      case 'quataxis'           : quatAxis = geoOptions[key]; break
       case 'rotationmode'       : rotationMode = geoOptions[key]; break
       case 'rebindtextures'     : rebindTextures = !!geoOptions[key]; break
       case 'flipx'              : flipX = geoOptions[key]; break
@@ -2710,7 +2705,7 @@ const LoadGeometry = async (renderer, geoOptions) => {
      shapeType != 'custom shape' && shapeType != 'obj' && shapeType != 'dynamic' ||
      //((scaleX != 1 || scaleY != 1 || scaleZ != 1) &&
      ((size != 1) &&
-     shapeType != 'obj' && shapeType != 'lines' && shapeType != 'particles')){
+     shapeType != 'obj')){
        // && (sphereize || scaleX != 1 || scaleY != 1 || scaleZ != 1)){
     var ip1 = sphereize
     var ip2 = 1 -sphereize
@@ -3291,7 +3286,6 @@ const LoadGeometry = async (renderer, geoOptions) => {
     oUvs, oScaleUVX, oScaleUVY, isPartitioned,
     partitionSize, partitionRadius, oCamX, oCamY, oCamZ,
     oCamRoll, oCamPitch, oCamYaw, scaleX, scaleY, scaleZ,
-    quatAxis,
   }
   
   
@@ -3912,27 +3906,6 @@ const GetShaderCoord = (vx, vy, vz, geometry, renderer,
       return [X, Y, Z]
     }
     return false
-  }
-}
-
-const FlipNormals = shape => {
-  var x, y, z, x1, y1, z1, x2, y2, z2
-  for(var i = 0; i < shape.normals; i+=6){
-    x1 = shape.normals[i+0]
-    y1 = shape.normals[i+1]
-    z1 = shape.normals[i+2]
-    x2 = shape.normals[i+3]
-    y2 = shape.normals[i+4]
-    z2 = shape.normals[i+5]
-    
-    shape.normals[i+3] = x1 - (x2-x1)
-    shape.normals[i+4] = y1 - (y2-y1)
-    shape.normals[i+5] = z1 - (z2-z1)
-  }
-  for(var i = 0; i < shape.normalVecs.length; i += 3){
-    shape.normalVecs[i+0] *= -1
-    shape.normalVecs[i+1] *= -1
-    shape.normalVecs[i+2] *= -1
   }
 }
 
@@ -4992,7 +4965,6 @@ const BasicShader = async (renderer, options=[]) => {
       uniform vec3 camOri;
       uniform vec3 geoPos;
       uniform vec3 geoOri;
-      uniform vec3 quatAxis;
       uniform int rotationMode;
       uniform int camRotationMode;
       uniform float scaleX;
@@ -5275,20 +5247,16 @@ const BasicShader = async (renderer, options=[]) => {
 
           }else{
             geo = Quat(geoPos, vec3(camOri.x, -camOri.y, -camOri.z), 0);
-            pos = Quat(vec3(cx, cy, cz),
-                       vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            pos = Quat(pos, quatAxis, 1);
+            pos = Quat(vec3(cx, cy, cz), vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
             pos.x += cpx;
             pos.y += cpy;
             pos.z += cpz;
             pos = Quat(pos,  vec3(-camOri.x, -camOri.y, -camOri.z), 0);
 
             nVec = Quat(nVeci, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            nVec = Quat(nVec, quatAxis, 1);
             nVec = Quat(nVec, vec3(0.0, -camOri.y, -camOri.z), 0);
 
             fsnVec = Quat(fsnVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            fsnVec = Quat(fsnVec, quatAxis, 1);
             fsnVec = Quat(fsnVec, vec3(0.0, -camOri.y, -camOri.z), 0);
           }
           cpx = 0.0;
@@ -5306,16 +5274,13 @@ const BasicShader = async (renderer, options=[]) => {
             geo = Quat(geoPos, vec3(camOri.x, camOri.y, -camOri.z), 0);
             pos = vec3(cx, cy, cz);
             pos = Quat(pos, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            pos = Quat(pos, quatAxis, 1);
             pos = Quat(pos, vec3(camOri.x, camOri.y, -camOri.z), 0);
             
             nVec = vec3(nVeci.x, nVeci.y, nVeci.z);
             nVec = Quat(nVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            nVec = Quat(nVec, quatAxis, 1);
             nVec = Quat(nVec, vec3(camOri.x, camOri.y, -camOri.z), 0);
 
             fsnVec = Quat(fsnVec, vec3(geoOri.x, -geoOri.y, -geoOri.z), 1);
-            fsnVec = Quat(fsnVec, quatAxis, 1);
             fsnVec = Quat(fsnVec, vec3(camOri.x, camOri.y, -camOri.z), 0);
           }
           fPos = pos;
@@ -5430,7 +5395,6 @@ const BasicShader = async (renderer, options=[]) => {
       uniform float colorMix;
       //uniform float penumbraPass;
       uniform vec3 color;
-      uniform vec3 quatAxis;
       uniform float useHeightMap;
       uniform float heightMapIntensity;
       uniform float maxHeightmap;
@@ -6149,16 +6113,13 @@ const BasicShader = async (renderer, options=[]) => {
           gl.uniform1f(dset.locIsSprite, geometry.isSprite ? 1.0 : 0.0)
 
           dset.locScaleX = gl.getUniformLocation(dset.program, "scaleX")
-          gl.uniform1f(dset.locScaleX, geometry.scaleX)
+          gl.uniform1f(dset.locIsSprite, geometry.scaleX)
 
           dset.locScaleY = gl.getUniformLocation(dset.program, "scaleY")
-          gl.uniform1f(dset.locScaleY, geometry.scaleY)
+          gl.uniform1f(dset.locIsSprite, geometry.scaleY)
 
           dset.locScaleZ = gl.getUniformLocation(dset.program, "scaleZ")
-          gl.uniform1f(dset.locScaleZ, geometry.scaleZ)
-
-          dset.locQuatAxis = gl.getUniformLocation(dset.program, "quatAxis")
-          gl.uniform3f(dset.locQuatAxis, ...geometry.quatAxis)
+          gl.uniform1f(dset.locIsSprite, geometry.scaleZ)
 
           dset.locShapeArrayIsSprite = gl.getUniformLocation(dset.program, "shapeArrayIsSprite")
           gl.uniform1f(dset.locShapeArrayIsSprite, geometry.shapeArrayIsSprite ? 1.0 : 0.0)
@@ -6808,8 +6769,7 @@ const ShapeFromArray = async (shape, pointArray, options={}) => {
     'heightmapDataArrayWidth', 'heightmapDataArrayHeight',
     'rebindTextures', 'exportAsOBJ', 'downloadAsOBJ',
     'resolved','map', 'video', 'muted', 'partitionSize',
-    'partitionRadius', 'scaleX', 'scaleY', 'scaleZ',
-    'quatAxis'
+    'partitionRadius', 'scaleX', 'scaleY', 'scaleZ'
   ]).forEach(key => { opts[key] = shape[key] })
   opts.name = shape.name
   Object.keys(options).forEach((key, idx) => {
@@ -7015,50 +6975,18 @@ const GeometryFromRaw = (raw, texCoords, size, subs,
   }
 }
 
-const ClearLocation = shape => {
-  shape.x = 0
-  shape.y = 0
-  shape.z = 0
-  shape.offsetX = 0
-  shape.offsetY = 0
-  shape.offsetZ = 0
-}
-
-const ClearScale= shape => {
-  shape.scaleX = 1
-  shape.scaleY = 1
-  shape.scaleZ = 1
-}
-
-const ClearRotation = shape => {
-  shape.yaw = 0
-  shape.pitch = 0
-  shape.roll = 0
-  shape.quatAxis = [0,0,0]
-}
-
-const ClearAllTransforms = shape => {
-  ClearLocation()
-  ClearScale()
-  ClearRotation()
-}
-
-const ClearAll = shape => {
-  ClearAllTransforms()
-}
-
 const ApplyLocation = shape => {
   for(var i = 0; i < shape.vertices.length; i+=3){
-    shape.vertices[i+0] += shape.x
-    shape.vertices[i+1] += shape.y
-    shape.vertices[i+2] += shape.z
+    shape.vertices[i+0] -= shape.x * 2
+    shape.vertices[i+1] -= shape.y * 2
+    shape.vertices[i+2] -= shape.z * 2
   }
   shape.x = 0
   shape.y = 0
   shape.z = 0
 }
 
-const ApplyRotation = (shape, quatOnly=false) => {
+const ApplyRotation = shape => {
   var x, y, z, p, d, component
   for(var m = 3; m--;){
     switch(m){
@@ -7070,83 +6998,77 @@ const ApplyRotation = (shape, quatOnly=false) => {
       x = shape[component][i+0]
       y = shape[component][i+1]
       z = shape[component][i+2]
-      if(!quatOnly){
-        switch(0){ //shape.rotationMode){
-          case 0:
-            p = Math.atan2(x, y) + shape.roll
-            d = Math.hypot(x, y)
-            x = S(p) * d
-            y = C(p) * d
-            p = Math.atan2(x, z) + shape.yaw
-            d = Math.hypot(x, z)
-            x = S(p) * d
-            z = C(p) * d
-            p = Math.atan2(y, z) + shape.pitch
-            d = Math.hypot(y, z)
-            y = S(p) * d
-            z = C(p) * d
-          break
-          case 1:
-            p = Math.atan2(y, z) + shape.pitch
-            d = Math.hypot(y, z)
-            y = S(p) * d
-            z = C(p) * d
-            p = Math.atan2(x, z) + shape.yaw
-            d = Math.hypot(x, z)
-            x = S(p) * d
-            z = C(p) * d
-            p = Math.atan2(x, y) + shape.roll
-            d = Math.hypot(x, y)
-            x = S(p) * d
-            y = C(p) * d
-          break
-          case 2:
-            p = Math.atan2(x, z) + shape.yaw
-            d = Math.hypot(x, z)
-            x = S(p) * d
-            z = C(p) * d
-            p = Math.atan2(y, z) + shape.pitch
-            d = Math.hypot(y, z)
-            y = S(p) * d
-            z = C(p) * d
-            p = Math.atan2(x, y) + shape.roll
-            d = Math.hypot(x, y)
-            x = S(p) * d
-            y = C(p) * d
-          break
-          case 3:
-            p = Math.atan2(x, z) + shape.yaw
-            d = Math.hypot(x, z)
-            x = S(p) * d
-            z = C(p) * d
-            p = Math.atan2(y, z) + shape.pitch
-            d = Math.hypot(y, z)
-            y = S(p) * d
-            z = C(p) * d
-            p = Math.atan2(x, y) + shape.roll
-            d = Math.hypot(x, y)
-            x = S(p) * d
-            y = C(p) * d
-          break
-        }
+      switch(shape.rotationMode){
+        case 0:
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+        break
+        case 1:
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+        break
+        case 2:
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+        break
+        case 3:
+          p = Math.atan2(x, z) + shape.yaw
+          d = Math.hypot(x, z)
+          x = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(y, z) + shape.pitch
+          d = Math.hypot(y, z)
+          y = S(p) * d
+          z = C(p) * d
+          p = Math.atan2(x, y) + shape.roll
+          d = Math.hypot(x, y)
+          x = S(p) * d
+          y = C(p) * d
+        break
       }
-      
-      var res = Quat([x, y, z], shape.quatAxis)
-      
-      shape[component][i+0] = res[0]
-      shape[component][i+1] = res[1]
-      shape[component][i+2] = res[2]
+      shape[component][i+0] = x
+      shape[component][i+1] = y
+      shape[component][i+2] = z
     }
   }
   shape.yaw = shape.pitch = shape.roll = 0
-  shape.quatAxis = [0,0,0]
 }
 
 const ApplyScale = shape => {
   for(var i = 0; i < shape.vertices.length; i += 3){
-    shape.vertices[i+0] *= shape.scaleX
-    shape.vertices[i+1] *= shape.scaleY
-    shape.vertices[i+2] *= shape.scaleZ
+    x = shape.vertices[i+0] *= shape.scaleX
+    y = shape.vertices[i+1] *= shape.scaleY
+    z = shape.vertices[i+2] *= shape.scaleZ
   }
   shape.scaleX = 1
   shape.scaleY = 1
@@ -7154,9 +7076,9 @@ const ApplyScale = shape => {
 }
 
 const ApplyAllTransforms = shape => {
-  ApplyScale(shape)
-  ApplyRotation(shape)
   ApplyLocation(shape)
+  ApplyRotation(shape)
+  ApplyScale(shape)
 }
 
 
@@ -9773,40 +9695,24 @@ const getParams = ctx => {
   document.body.appendChild(popup)
 }
 
-const Quat = (pos, vec) => {
-  var cosa, sina, cosb, sinb, cosc, sinc, ret
-  const pFunc = (pt, cosa, sina,
-              cosb, sinb,
-              cosc, sinc) => {
-    var xx, xy, xz, yx, yy, yz, zx, zy, zz
-    xx = cosa*cosb
-    xy = cosa*sinb*sinc - sina*cosc
-    xz = cosa*sinb*cosc + sina*sinc
-    yx = sina*cosb
-    yy = sina*sinb*sinc + cosa*cosc
-    yz = sina*sinb*cosc - cosa*sinc
-    zx = -sinb
-    zy = cosb*sinc
-    zz = cosb*cosc
-    return [xx*pt[0] + xy*pt[1] + xz*pt[2],
-            yx*pt[0] + yy*pt[1] + yz*pt[2],
-            zx*pt[0] + zy*pt[1] + zz*pt[2]]
-  }
-  ret = [pos[0], pos[1], pos[2]]
-  cosa = C(-vec[0]); sina = S(-vec[0])
-  cosb = C(0.0); sinb = S(0.0)
-  cosc = C(0.0); sinc = S(0.0)
-  ret = pFunc(ret, cosa, sina, cosb, sinb, cosc, sinc)
-  cosa = C(0.0); sina = S(0.0)
-  cosb = C(-vec[2]); sinb = S(-vec[2])
-  cosc = C(0.0); sinc = S(0.0)
-  ret = pFunc(ret, cosa, sina, cosb, sinb, cosc, sinc)
-  cosa = C(0.0); sina = S(0.0)
-  cosb = C(0.0); sinb = S(0.0)
-  cosc = C(vec[1]); sinc = S(vec[1])
-  ret = pFunc(ret, cosa, sina, cosb, sinb, cosc, sinc)
-  return ret
+const Quat = axis => {
+  var S = Math.sin
+  var C = Math.cos
+  var cosa = C(axis[0]), sina = S(axis[0])
+  var cosb = C(axis[1]), sinb = S(axis[1])
+  var cosc = C(axis[2]), sinc = S(axis[2])
+  var xx = cosa*cosb
+  var xy = cosa*sinb*sinc - sina*cosc
+  var xz = cosa*sinb*cosc + sina*sinc
+  var yx = sina*cosb
+  var yy = sina*sinb*sinc + cosa*cosc
+  var yz = sina*sinb*cosc - cosa*sinc
+  var zx = -sinb
+  var zy = cosb*sinc
+  var zz = cosb*cosc
+  return [xx + xy + xz, yx + yy + yz, zx + zy + zz]
 }
+
 
 const ShapeArray = {
   push: async (renderer, shape) => {
@@ -9913,10 +9819,6 @@ const ShapeArray = {
   },
 }
 
-const ApplyAll = shape => {
-  return ApplyAllTransforms(shape)
-}
-
 const GenHash = data => Hash.GenHash(data)
 
 var Overlay        // for sketch-up, e.g. shape-bounding graphics
@@ -9971,17 +9873,11 @@ export {
   ApplyLocation,
   ApplyRotation,
   ApplyScale,
-  ApplyAll,
   ApplyAllTransforms,
-  ClearRotation,
-  ClearScale,
-  ClearAll,
-  ClearAllTransforms,
   InitialTime,
   ShiftArray,
   ShiftArray2D,
   ShiftArray3D,
-  FlipNormals,
   ImageToPo2,
   LoadOBJ,
   IsPowerOf2,
