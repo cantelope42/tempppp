@@ -2710,7 +2710,7 @@ const LoadGeometry = async (renderer, geoOptions) => {
      shapeType != 'custom shape' && shapeType != 'obj' && shapeType != 'dynamic' ||
      //((scaleX != 1 || scaleY != 1 || scaleZ != 1) &&
      ((size != 1) &&
-     shapeType != 'obj')){
+     shapeType != 'obj' && shapeType != 'lines' && shapeType != 'particles')){
        // && (sphereize || scaleX != 1 || scaleY != 1 || scaleZ != 1)){
     var ip1 = sphereize
     var ip2 = 1 -sphereize
