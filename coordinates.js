@@ -7055,8 +7055,11 @@ const ApplyLocation = shape => {
   shape.z = 0
 }
 
-const ApplyRotation = (shape, quatOnly=false) => {
+const ApplyRotation = (shape, quatOnly=false,
+                       overrideRotationMode=-1) => {
   var x, y, z, p, d, component
+  var rotationMode = overrideRotationMode == -1 ?
+                     shape.rotationMode : overrideRotationMode
   for(var m = 3; m--;){
     switch(m){
       case 0: component = 'vertices'; break
@@ -7068,7 +7071,7 @@ const ApplyRotation = (shape, quatOnly=false) => {
       y = shape[component][i+1]
       z = shape[component][i+2]
       if(!quatOnly){
-        switch(shape.rotationMode){
+        switch(rotationMode){
           case 0:
             p = Math.atan2(x, y) + shape.roll
             d = Math.hypot(x, y)
@@ -7128,7 +7131,7 @@ const ApplyRotation = (shape, quatOnly=false) => {
         }
       }
       
-      var res = Quat([x, y, z], shape.quatAxis, shape.rotationMode)
+      var res = Quat([x, y, z], shape.quatAxis, rotationMode)
       
       shape[component][i+0] = res[0]
       shape[component][i+1] = res[1]
