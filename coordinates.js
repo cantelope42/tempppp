@@ -7141,7 +7141,7 @@ const ApplyRotation = (shape, quatOnly=false,
           res = R_pyr(x, y, z, shape.roll, shape.pitch, shape.yaw)
         break
         case 2: case 3:
-          res = ypr(x, y, z, shape.roll, shape.pitch, shape.yaw)
+          res = R_ypr(x, y, z, shape.roll, shape.pitch, shape.yaw)
         break
       }
       
