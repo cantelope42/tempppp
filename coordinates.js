@@ -7135,13 +7135,13 @@ const ApplyRotation = (shape, quatOnly=false,
       //var res = Quat([x, y, z], shape.quatAxis, rotationMode)
       switch(rotationMode){
         case 0:
-          res = R_ryp(x, y, z, shape.roll, shape.pitch, shape.yaw)
+          res = R_ryp(x, y, z, shape)
         break
         case 1:
-          res = R_pyr(x, y, z, shape.roll, shape.pitch, shape.yaw)
+          res = R_pyr(x, y, z, shape)
         break
         case 2: case 3:
-          res = R_ypr(x, y, z, shape.roll, shape.pitch, shape.yaw)
+          res = R_ypr(x, y, z, shape)
         break
       }
       
