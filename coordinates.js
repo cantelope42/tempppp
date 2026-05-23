@@ -7068,7 +7068,7 @@ const ApplyRotation = (shape, quatOnly=false) => {
       y = shape[component][i+1]
       z = shape[component][i+2]
       if(!quatOnly){
-        switch(1){ //shape.rotationMode){
+        switch(0){ //shape.rotationMode){
           case 0:
             p = Math.atan2(x, y) + shape.roll
             d = Math.hypot(x, y)
