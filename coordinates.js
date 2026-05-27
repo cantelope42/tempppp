@@ -6876,6 +6876,9 @@ const ShapeToLines = async (shape, options={}) => {
       case 'roll':
       case 'pitch':
       case 'yaw':
+      case 'scalex':
+      case 'scaley':
+      case 'scalez':
         lO[key] = shape[key]; break
       break
       default: break
@@ -7055,11 +7058,8 @@ const ApplyLocation = shape => {
   shape.z = 0
 }
 
-const ApplyRotation = (shape, quatOnly=false,
-                       overrideRotationMode=-1) => {
+const ApplyRotation = (shape, quatOnly=false) => {
   var x, y, z, p, d, component
-  var rotationMode = overrideRotationMode == -1 ?
-                     shape.rotationMode : overrideRotationMode
   for(var m = 3; m--;){
     switch(m){
       case 0: component = 'vertices'; break
@@ -7071,7 +7071,7 @@ const ApplyRotation = (shape, quatOnly=false,
       y = shape[component][i+1]
       z = shape[component][i+2]
       if(!quatOnly){
-        switch(rotationMode){
+        switch(0){ //shape.rotationMode){
           case 0:
             p = Math.atan2(x, y) + shape.roll
             d = Math.hypot(x, y)
@@ -7131,19 +7131,7 @@ const ApplyRotation = (shape, quatOnly=false,
         }
       }
       
-      var res
-      //var res = Quat([x, y, z], shape.quatAxis, rotationMode)
-      switch(rotationMode){
-        case 0:
-          res = R_ryp(x, y, z, shape)
-        break
-        case 1:
-          res = R_pyr(x, y, z, shape)
-        break
-        case 2: case 3:
-          res = R_ypr(x, y, z, shape)
-        break
-      }
+      var res = Quat([x, y, z], shape.quatAxis)
       
       shape[component][i+0] = res[0]
       shape[component][i+1] = res[1]
@@ -9785,7 +9773,7 @@ const getParams = ctx => {
   document.body.appendChild(popup)
 }
 
-const Quat = (pos, vec, rotMode=0) => {
+const Quat = (pos, vec) => {
   var cosa, sina, cosb, sinb, cosc, sinc, ret
   const pFunc = (pt, cosa, sina,
               cosb, sinb,
@@ -9804,33 +9792,18 @@ const Quat = (pos, vec, rotMode=0) => {
             yx*pt[0] + yy*pt[1] + yz*pt[2],
             zx*pt[0] + zy*pt[1] + zz*pt[2]]
   }
-  var ord
-  switch(rotMode){
-    case 0:
-      ord = [0,2,1]
-    break
-    case 1:
-      ord = [1,2,0]
-    break
-    case 2:
-      ord = [2,1,0]
-    break
-    case 3:
-      ord = [2,1,0]
-    break
-  }
   ret = [pos[0], pos[1], pos[2]]
-  cosa = C(-vec[ord[0]]); sina = S(-vec[ord[0]])
+  cosa = C(-vec[0]); sina = S(-vec[0])
   cosb = C(0.0); sinb = S(0.0)
   cosc = C(0.0); sinc = S(0.0)
   ret = pFunc(ret, cosa, sina, cosb, sinb, cosc, sinc)
   cosa = C(0.0); sina = S(0.0)
-  cosb = C(-vec[ord[1]]); sinb = S(-vec[ord[1]])
+  cosb = C(-vec[2]); sinb = S(-vec[2])
   cosc = C(0.0); sinc = S(0.0)
   ret = pFunc(ret, cosa, sina, cosb, sinb, cosc, sinc)
   cosa = C(0.0); sina = S(0.0)
   cosb = C(0.0); sinb = S(0.0)
-  cosc = C(vec[ord[2]]); sinc = S(vec[ord[2]])
+  cosc = C(vec[1]); sinc = S(vec[1])
   ret = pFunc(ret, cosa, sina, cosb, sinb, cosc, sinc)
   return ret
 }
