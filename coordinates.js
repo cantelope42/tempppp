@@ -5328,9 +5328,9 @@ const BasicShader = async (renderer, options=[]) => {
         if((isLine != 0.0 || isParticle != 0.0) &&
           penumbraPass != 0.0) Z += .001;
         if(isLine != 0.0){
-          X = (position.x * pow(scaleX, 2.0) + offset.x) / resolution.x * fov / scaleX;
-          Y = (position.y * pow(scaleY, 2.0) + offset.y) / resolution.y * fov / scaleY;
-          Z = (position.z * pow(scaleZ, 2.0) + offset.z) / scaleZ;
+          X = (position.x * scaleX + offset.x) / resolution.x * fov / scaleX;
+          Y = (position.y * scaleY + offset.y) / resolution.y * fov / scaleY;
+          Z = position.z * scaleZ + offset.z;
           rasterPos = vec3(X, Y, Z);
           gl_Position = vec4(X, Y, Z/10000.0, 1.0);
           depth = pow(1.0 + sqrt(X*X + Y*Y + Z*Z), 1.0) / 100.0;
