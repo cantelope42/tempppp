@@ -5321,6 +5321,7 @@ const BasicShader = async (renderer, options=[]) => {
         ${uVertCode}
         ${aVertCode}
         
+        float fov2 = 1e3;
         float camz = cpz / 1e3 * fov;
         
         float X, Y;
@@ -5328,8 +5329,8 @@ const BasicShader = async (renderer, options=[]) => {
         if((isLine != 0.0 || isParticle != 0.0) &&
           penumbraPass != 0.0) Z += .001;
         if(isLine != 0.0){
-          X = (position.x * scaleX + offset.x) / resolution.x * fov;
-          Y = (position.y * scaleY + offset.y) / resolution.y * fov;
+          X = (position.x * scaleX + offset.x) / resolution.x * fov2;
+          Y = (position.y * scaleY + offset.y) / resolution.y * fov2;
           Z = position.z * scaleZ + offset.z;
           rasterPos = vec3(X, Y, Z);
           gl_Position = vec4(X, Y, Z/10000.0, 1.0);
