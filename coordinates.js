@@ -461,12 +461,12 @@ const Renderer = async options => {
                   var d = renderer.fov
                   var s = geometry.size * (penumbraPass ? 4 : 1) / 50
                   for(var i = 0; i<geometry.vertices.length; i+=6){
-                    X1 = -geometry.vertices[i+0]
-                    Y1 = geometry.vertices[i+1]
-                    Z1 = geometry.vertices[i+2]
-                    X2 = -geometry.vertices[i+3]
-                    Y2 = geometry.vertices[i+4]
-                    Z2 = geometry.vertices[i+5]
+                    X1 = -geometry.vertices[i+0] * geometry.scaleX
+                    Y1 = geometry.vertices[i+1] * geometry.scaleY
+                    Z1 = geometry.vertices[i+2] * geometry.scaleZ
+                    X2 = -geometry.vertices[i+3] * geometry.scaleX
+                    Y2 = geometry.vertices[i+4] * geometry.scaleY
+                    Z2 = geometry.vertices[i+5] * geometry.scaleZ
                     
                     p1 = GetShaderCoord(X1, Y1, Z1, geometry, renderer)
                     p2 = GetShaderCoord(X2, Y2, Z2, geometry, renderer)
@@ -5321,7 +5321,6 @@ const BasicShader = async (renderer, options=[]) => {
         ${uVertCode}
         ${aVertCode}
         
-        float fov2 = 1e3;
         float camz = cpz / 1e3 * fov;
         
         float X, Y;
@@ -5329,9 +5328,9 @@ const BasicShader = async (renderer, options=[]) => {
         if((isLine != 0.0 || isParticle != 0.0) &&
           penumbraPass != 0.0) Z += .001;
         if(isLine != 0.0){
-          X = (position.x * scaleX + offset.x) / resolution.x * fov2;
-          Y = (position.y * scaleY + offset.y) / resolution.y * fov2;
-          Z = position.z * scaleZ + offset.z;
+          X = (position.x + offset.x) / resolution.x * fov;
+          Y = (position.y + offset.y) / resolution.y * fov;
+          Z = position.z + offset.z;
           rasterPos = vec3(X, Y, Z);
           gl_Position = vec4(X, Y, Z/10000.0, 1.0);
           depth = pow(1.0 + sqrt(X*X + Y*Y + Z*Z), 1.0) / 100.0;
