@@ -6580,9 +6580,9 @@ const ProcessShapeArray = shape => {
             case 1: l = 'vstate'; break
             case 2: l = 'fsnvstate'; break
           }
-          x = shape[l][i + k + 0] - tx * m
-          y = shape[l][i + k + 1] - ty * m
-          z = shape[l][i + k + 2] - tz * m
+          x = shape[l][i + k + 0] //- tx * m
+          y = shape[l][i + k + 1] //- ty * m
+          z = shape[l][i + k + 2] //- tz * m
           switch(rotationMode){
             case 0:
               p = Math.atan2(x, y) + roll
@@ -6646,9 +6646,9 @@ const ProcessShapeArray = shape => {
           shape[l][i + k + 1] = y + (ty + data[shpIdx].y) * m
           shape[l][i + k + 2] = z + (tz + data[shpIdx].z) * m
           if(shape.showNormals){
-            x = shape.nstate[(i + k) * 2 + 0 + m * 3] //- tx
-            y = shape.nstate[(i + k) * 2 + 1 + m * 3] //- ty
-            z = shape.nstate[(i + k) * 2 + 2 + m * 3] //- tz
+            x = shape.nstate[(i + k) * 2 + 0 + m * 3] - tx
+            y = shape.nstate[(i + k) * 2 + 1 + m * 3] - ty
+            z = shape.nstate[(i + k) * 2 + 2 + m * 3] - tz
             switch(shape.rotationMode){
               case 0:
                 p = Math.atan2(x, y) + roll
