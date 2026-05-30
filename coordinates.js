@@ -6580,9 +6580,9 @@ const ProcessShapeArray = shape => {
             case 1: l = 'vstate'; break
             case 2: l = 'fsnvstate'; break
           }
-          x = shape[l][i + k + 0] //- tx * m
-          y = shape[l][i + k + 1] //- ty * m
-          z = shape[l][i + k + 2] //- tz * m
+          x = shape[l][i + k + 0] - tx //* m
+          y = shape[l][i + k + 1] - ty //* m
+          z = shape[l][i + k + 2] - tz //* m
           switch(rotationMode){
             case 0:
               p = Math.atan2(x, y) + roll
@@ -6642,9 +6642,9 @@ const ProcessShapeArray = shape => {
             case 2: l = 'flatShadingNormalVecs'; break
           }
           //var l = m ? 'vertices' : 'normalVecs'
-          shape[l][i + k + 0] = x + (tx + data[shpIdx].x) * m
-          shape[l][i + k + 1] = y + (ty + data[shpIdx].y) * m
-          shape[l][i + k + 2] = z + (tz + data[shpIdx].z) * m
+          shape[l][i + k + 0] = x + (tx + data[shpIdx].x) //* m
+          shape[l][i + k + 1] = y + (ty + data[shpIdx].y) //* m
+          shape[l][i + k + 2] = z + (tz + data[shpIdx].z) //* m
           if(shape.showNormals){
             x = shape.nstate[(i + k) * 2 + 0 + m * 3] - tx
             y = shape.nstate[(i + k) * 2 + 1 + m * 3] - ty
